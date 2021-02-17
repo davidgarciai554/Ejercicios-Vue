@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+
+
+</head>
+
+<body>
+    <br>
+    <div>
+        <select class="form-control" id="generation" width="50px">
+            <option>1º Gen</option>
+            <option>2º Gen</option>
+            <option>3º Gen</option>
+            <option>4º Gen</option>
+            <option>5º Gen</option>
+            <option>6º Gen</option>
+            <option>7º Gen</option>
+            <option>8º Gen</option>
+        </select>
+        <input type="button" value="Show generation" onclick='sacarPokemonsGen()'>
+    </div>
+    <div id="main">
+    </div>
+
+
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+        crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://unpkg.com/axios"></script>
+    <script>
+
+        function sacarPokemonsGen() {
+            $('#main').empty();
+            var pokedex = document.createElement('div');
+            pokedex.id = "pokedex"
+            document.getElementById('main').appendChild(pokedex);
+
+            if (document.getElementById('generation').value.indexOf("1") == 0) {
+                var first = 1, last = 151;
+            } else if (document.getElementById('generation').value.indexOf("2") == 0) {
+                var first = 152, last = 251;
+            } else if (document.getElementById('generation').value.indexOf("3") == 0) {
+                var first = 252, last = 386;
+            } else if (document.getElementById('generation').value.indexOf("4") == 0) {
+                var first = 387, last = 493;
+            } else if (document.getElementById('generation').value.indexOf("5") == 0) {
+                var first = 494, last = 649;
+            } else if (document.getElementById('generation').value.indexOf("6") == 0) {
+                var first = 650, last = 721;
+            } else if (document.getElementById('generation').value.indexOf("7") == 0) {
+                var first = 722, last = 809;
+            } else if (document.getElementById('generation').value.indexOf("8") == 0) {
+                var first = 810, last = 898;
+            }
+            var numPokemones = last - first + 1;
+            var aux = 0
+            for (var i = 0; i < numPokemones / 3; i++) {
+                var br = document.createElement('br');
+                document.getElementById('pokedex').appendChild(br);
+                var div = document.createElement('div');
+                div.style = "display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); grid-gap: 20px; padding-inline-start: 0;";
+                document.getElementById('pokedex').appendChild(div);
+                for (var j = 0; j < 3; j++) {
+                    if (aux < numPokemones) {
+                        var poke = document.createElement('pokemon');
+                        div.appendChild(poke)
+                        poke.innerHTML += "";
+                        aux++
+                    } else {
+                        var aux = document.createElement('div');
+                        div.appendChild(aux)
+                        aux.innerHTML += "";
+                    }
+
+                }
+
+            }
+            showGen(first);
+
+        }
+
+        function showGen(first) {
+            var pokemon = first
+
+            const miapp = Vue.createApp({})
+            miapp.component('pokemon', {
+                //la plantilla común a todos los elementos que vamos a crear
+
+                //una función para obtener un dato distinto en cada elemento
+                data() {
+                    axios.get('https://pokeapi.co/api/v2/pokemon/' + pokemon)//Datos api
+                        .then(respuesta => (this.datos = respuesta.data)).catch(error =>
+                            (this.datos = { "name": "....", "id": "....", "sprites.front_default": "....", "sprites.front_shiny": "...." })
+
+                        );
+                    ;
+
+                    return {
+                        datos: {},
+                        pokemon: pokemon++,
+                        currentImage: 0,
+                    }
+                },
+                //función a ejecutar cuando se termine de crear el elemento
+                computed: {
+                    nombrePokemon() {//Lamada elemtos api 
+                        try {
+                            return this.datos.name;
+                        } catch (e) { return "..." }
+                    },
+                    idPokemon() {
+                        try {
+                            return this.datos.id;
+                        } catch (e) { return "..." }
+
+                    },
+                    imgPokemon() {
+                        try {
+                            return this.datos.sprites.front_default;
+                        } catch (e) { return "..." }
+                    },
+                    imgPokemonShiny() {
+                        try {
+
+                            return this.datos.sprites.front_shiny;
+                        } catch (e) { return "..." }
+                    }
+                },//cartas donde salen pokemon
+                template: ` <li class="card" style="list-style: none; padding: 40px; background-color: #f4f4f4;color: #222; text-align: center;"> 
+                                <center>  
+                                    <img class="card-image"  :src="imgPokemonShiny"  :id="'shiny'+idPokemon" width="250" height="250"  style="position:absolute;visibility:hidden" onclick="changeImage(this.id)"/>       
+                                    <img class="card-image"  :src="imgPokemon"  :id="'front'+idPokemon" width="250" height="250" style="position:relative" onclick="changeImage(this.id)"/>
+                                    <h2 class="card-title" style="text-transform: capitalize; margin-bottom: 0px; font-size: 32px;font-weight: normal;">Name: {{nombrePokemon}}</h2>
+                                    <p class="card-subtitle" style="margin-top: 5px; color: #666; font-weight: lighter;">Id: {{idPokemon}}   </p>   
+                                </center>            
+                            </li>`
+            })
+            miapp.mount('#pokedex')
+        }
+
+        function changeImage(pokeId) {//funcion para cambiar la imagen
+            var position =pokeId.substring(0,5)
+            var id = pokeId.substring(5)
+            if(position=="front"){
+                $('#front' + id).css("visibility","").css("position","relative").css("visibility","hidden")
+                $("#shiny"+id).css("position","").css("visibility","").css("position","absolute").css("visibility","show");       
+            }else {
+                $("#front"+id).css("visibility","").css("position:relative","visibility:show");
+                $("#shiny"+id).css("visibility","").css("position:absolute","visibility:hidden");
+            }
+            
+        }
+    </script>
+</body>
+
+</html>

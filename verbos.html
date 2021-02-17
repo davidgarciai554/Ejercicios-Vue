@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        crossorigin="anonymous">
+    <title>Document</title>
+</head>
+<body>
+    <br>
+    <div id="main">
+    </div>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://cdn.rawgit.com/nnattawat/flip/master/dist/jquery.flip.min.js"></script>
+    <script src="js/listaverbos.js"></script>
+    <script>
+        const miapp = Vue.createApp({})
+        var filas=3 , columnas=5;
+        for (var i = 0; i < columnas; i++) {
+            var div_verbs = document.createElement('div');
+            div_verbs.style = "display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); grid-gap: 20px; padding-inline-start: 0;"
+            div_verbs.id = "div_verbs"
+            document.getElementById('main').appendChild(div_verbs);
+            for (var j = 0; j < filas; j++) {
+                var verbo_ = document.createElement('verbo');
+                document.getElementById('div_verbs').appendChild(verbo_)
+            }
+        }
+        function getVerbs(id) {
+            var i = Math.floor((Math.random() * verbos.length) + 1);
+            var aux = Math.floor((Math.random() * 3))
+            if (aux == 0) {
+                $('#frontVerbs' + id).html("... <br>" + verbos[i][1] + " <br> " + verbos[i][2]);
+                $('#backVerbs' + id).html(verbos[i][aux] + "<br> <br> <br>")
+            } else if (aux == 1) {
+                $('#frontVerbs' + id).html(verbos[i][0] + "<br> ... <br> " + verbos[i][2]);
+                $('#backVerbs' + id).html("<br>" + verbos[i][aux] + " <br> <br>")
+            } else if (aux == 2) {
+                $('#frontVerbs' + id).html(verbos[i][0] + "<br>" + verbos[i][1] + "<br> ...");
+                $('#backVerbs' + id).html("<br> <br> " + verbos[i][aux] + "<br>")
+            }
+        }
+        $(document).ready(function () {
+            for (var i = 1; i <= filas*columnas; i++) {
+                getVerbs(i);
+                $("#mainCard" + i).flip({
+                    axis: 'y',
+                    trigger: 'click'
+                });
+            }
+        });
+        var id = 1
+        miapp.component('verbo', {
+            data() {
+                return {
+                    id: id++
+                }
+            },
+            template: `
+                <div :id="'mainCard'+id"  >
+                    <div class="front">
+                        <div class="card" style="list-style: none; padding: 40px; background-color: #f4f4f4;color: #222; text-align: center; ">
+                            <div class="card-body">
+                                <h5 class="card-title" :id="'frontVerbs'+id" ></h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="back" >
+                        <div class="card"style="list-style: none; padding: 40px; background-color:#C2C2C2;color: #222; text-align: center; ">
+                            <div class="card-body">
+                                <h5 class="card-title" :id="'backVerbs'+id"></h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        });
+        miapp.mount('#main')
+    </script>
+</body>
+</html>
